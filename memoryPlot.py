@@ -39,8 +39,8 @@ def convert_maxrss_to_bytes(maxrss: str) -> int:
     else:
         raise ValueError(f"Unknown unit '{unit}' in MaxRSS value.")
 # Read data from CSV files
-job_info_df = pd.read_csv('job_info_output.csv')
-sacct_df = pd.read_csv('job_statistics_output.csv')  # Replace with your actual filename
+job_info_df = pd.read_csv('https://raw.githubusercontent.com/bboyfury/pomcppf_experiment_1/main/job_info_output.csv')
+sacct_df = pd.read_csv('https://raw.githubusercontent.com/bboyfury/pomcppf_experiment_1/main/job_statistics_output.csv')  # Replace with your actual filename
 
 # Ensure JobID columns are strings
 job_info_df['JobID'] = job_info_df['JobID'].astype(str)

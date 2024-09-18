@@ -3,9 +3,8 @@ import pandas as pd
 import numpy as np
 
 # Read data from CSV files
-job_info_df = pd.read_csv('job_info_output.csv')
-sacct_df = pd.read_csv('job_statistics_output.csv')  # Replace with your actual filename
-
+job_info_df = pd.read_csv('https://raw.githubusercontent.com/bboyfury/pomcppf_experiment_1/main/job_info_output.csv')
+sacct_df = pd.read_csv('https://raw.githubusercontent.com/bboyfury/pomcppf_experiment_1/main/job_statistics_output.csv') 
 # Ensure JobID columns are strings
 job_info_df['JobID'] = job_info_df['JobID'].astype(str)
 sacct_df['JobID'] = sacct_df['JobID'].astype(str)
