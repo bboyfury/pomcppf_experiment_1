@@ -77,6 +77,15 @@ fig = go.Figure(data=[go.Scatter3d(
         'Elapsed (formatted): %{customdata[0]}<extra></extra>'  # Show 'Elapsed' from the custom data
     )
 )])
+# Update plot layout
+fig.update_layout(
+    title='3D Scatter Plot of TRAJECTORIES vs Horizon vs PARTICLES (elapsed time)',
+    scene=dict(
+        xaxis_title='TRAJECTORIES',
+        yaxis_title='Horizon',
+        zaxis_title='PARTICLES'
+    )
+)
 
 # Show the plot
 fig.show()

@@ -1,11 +1,7 @@
-from matplotlib.colors import Normalize
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
-from helpers import parse_maxrss
-
-
+from matplotlib.colors import Normalize
 
 # Read data from CSV files
 job_info_df = pd.read_csv('https://raw.githubusercontent.com/bboyfury/pomcppf_experiment_1/main/job_info_output.csv')
@@ -22,26 +18,16 @@ job_info_df['MainJobID'] = job_info_df['JobID'].str.split(r'[._]').str[0]
 # Merge the two dataframes on 'MainJobID'
 merged_df = pd.merge(job_info_df, sacct_df, on='MainJobID')
 
-# Convert necessary columns to numeric types
-numeric_columns = ['TRAJECTORIES', 'Horizon', 'PARTICLES', 'ElapsedRaw']
-for col in numeric_columns:
-    merged_df[col] = pd.to_numeric(merged_df[col], errors='coerce')
-
-merged_df['MaxRSS_Bytes'] = merged_df['MaxRSS'].apply(parse_maxrss)
-
-# Drop rows with missing values in key columns
-merged_df.dropna(subset=['TRAJECTORIES', 'Horizon', 'PARTICLES', 'ElapsedRaw', 'MaxRSS_Bytes', 'FolderSize'], inplace=True)
-
-grouped_particles_with_values = merged_df.groupby('PARTICLES').apply(
-    lambda df: {
-        'x': sorted(set(df['Horizon'].tolist())),
-        'y': sorted(set(df['TRAJECTORIES'].tolist())),
-        'value': [df.loc[(df['Horizon'] == h) & (df['TRAJECTORIES'] == t), 'MaxRSS_Bytes'].max() 
-                  for h, t in zip(sorted(set(df['Horizon'])), sorted(set(df['TRAJECTORIES'])))]
-    }
-).to_dict()
-
-
+# Function to convert MaxRSS to bytes
+def parse_maxrss(value):
+    if isinstance(value, str) and value.endswith('K'):
+        return float(value[:-1]) * 1024
+    elif isinstance(value, str) and value.endswith('M'):
+        return float(value[:-1]) * 1024 * 1024
+    elif isinstance(value, str) and value.endswith('G'):
+        return float(value[:-1]) * 1024 * 1024 * 1024
+    else:
+        return float(value)
 
 # Convert necessary columns to numeric types
 numeric_columns = ['TRAJECTORIES', 'Horizon', 'PARTICLES', 'ElapsedRaw']
@@ -55,20 +41,23 @@ merged_df['MaxRSS_Bytes'] = merged_df['MaxRSS'].apply(parse_maxrss)
 merged_df['MaxRSS_MB'] = merged_df['MaxRSS_Bytes'] / (1024 * 1024)
 
 # Drop rows with missing values in key columns
-merged_df.dropna(subset=['TRAJECTORIES', 'Horizon', 'MaxRSS_MB'], inplace=True)
+merged_df.dropna(subset=['TRAJECTORIES', 'Horizon', 'MaxRSS_MB', 'PARTICLES'], inplace=True)
 
 # Normalize MaxRSS_MB for color mapping
 norm = Normalize(vmin=merged_df['MaxRSS_MB'].min(), vmax=merged_df['MaxRSS_MB'].max())
+
+# Scale PARTICLES for marker size (adjust scaling factor for visual clarity)
+particle_sizes = merged_df['PARTICLES'] / merged_df['PARTICLES'].max() * 100  # Scaling particle size
 
 # Now, we create the 3D scatter plot
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
-# Scatter plot with color mapping (red for high, blue for mid, green for low)
+# Scatter plot with color mapping (red for high, blue for mid, green for low) and varying marker sizes for PARTICLES
 sc = ax.scatter(merged_df['Horizon'], merged_df['TRAJECTORIES'], merged_df['MaxRSS_MB'], 
-                c=merged_df['MaxRSS_MB'], cmap='RdYlGn_r', norm=norm, marker='o')
+                c=merged_df['MaxRSS_MB'], cmap='RdYlGn_r', norm=norm, s=particle_sizes, marker='o')
 
-# Add a color bar
+# Add a color bar for MaxRSS
 plt.colorbar(sc, ax=ax, label='MaxRSS (MB)')
 
 # Set labels
@@ -76,8 +65,15 @@ ax.set_xlabel('Horizon')
 ax.set_ylabel('TRAJECTORIES')
 ax.set_zlabel('MaxRSS (MB)')
 
+# Add a legend for particle size
+# Creating a few dummy points with varying sizes for the legend
+for particle_count, size in zip([5, 10, 20, 30, 50, 100, 200], [5, 10, 20, 30, 50, 100, 200]):
+    ax.scatter([], [], [], s=size, c='gray', label=f'{particle_count} PARTICLES')
+
+# Add the legend for particle sizes
+ax.legend(loc='upper right', title='Particle Size', bbox_to_anchor=(1.5, 1), prop={'size': 10})
 # Customize the view angle
-ax.view_init(elev=30., azim=30)
+ax.view_init(elev=35., azim=35)
 
 # Show the plot
 plt.show()
