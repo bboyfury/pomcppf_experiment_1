@@ -24,5 +24,5 @@ Experiment Details
 This results in 196 combinations, which were submitted as individual jobs via Slurm.
 Notes
 
-    There are currently 5 jobs still running. Once those are completed, the results will be added to this report.
+    There are currently 2 jobs still running. Once those are completed, the results will be added to this report.
     Two 3D dot plots are provided to illustrate the relationship between parameter combinations and memory usage/execution time.
