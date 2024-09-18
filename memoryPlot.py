@@ -2,42 +2,10 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 
+from helpers import bytes_to_human_readable, parse_maxrss
 
-# Helper function to convert bytes into KB, MB, GB, etc.
-def bytes_to_human_readable(num_bytes):
-    units = ['B', 'KB', 'MB', 'GB', 'TB']
-    for unit in units:
-        if num_bytes < 1024:
-            return f"{num_bytes:.2f} {unit}"
-        num_bytes /= 1024
-    return f"{num_bytes:.2f} TB"
 
-def convert_maxrss_to_bytes(maxrss: str) -> int:
-    """
-    Converts a MaxRSS string (with 'K', 'M', or 'G' suffix) to bytes.
-    
-    Parameters:
-    - maxrss (str): MaxRSS value as a string, e.g., '123K', '1.2G'.
-    
-    Returns:
-    - int: MaxRSS value converted to bytes.
-    """
-    units = {'K': 1024, 'M': 1024**2, 'G': 1024**3}
-    
-    # Strip any spaces from the string
-    maxrss = maxrss.strip().upper()
-    
-    # Extract the numeric part and the unit part
-    try:
-        value = float(maxrss[:-1])
-        unit = maxrss[-1]
-    except ValueError:
-        raise ValueError("Invalid MaxRSS format.")
-    
-    if unit in units:
-        return int(value * units[unit])
-    else:
-        raise ValueError(f"Unknown unit '{unit}' in MaxRSS value.")
+
 # Read data from CSV files
 job_info_df = pd.read_csv('https://raw.githubusercontent.com/bboyfury/pomcppf_experiment_1/main/job_info_output.csv')
 sacct_df = pd.read_csv('https://raw.githubusercontent.com/bboyfury/pomcppf_experiment_1/main/job_statistics_output.csv')  # Replace with your actual filename
@@ -58,22 +26,6 @@ numeric_columns = ['TRAJECTORIES', 'Horizon', 'PARTICLES', 'ElapsedRaw']
 for col in numeric_columns:
     merged_df[col] = pd.to_numeric(merged_df[col], errors='coerce')
 
-# Function to convert MaxRSS to bytes
-def parse_maxrss(rss_str):
-    if pd.isnull(rss_str):
-        return np.nan
-    rss_str = str(rss_str).strip()
-    units = {'K': 1024, 'M': 1024**2, 'G': 1024**3, 'T': 1024**4}
-    for unit in units:
-        if rss_str.upper().endswith(unit):
-            try:
-                return float(rss_str[:-1]) * units[unit]
-            except ValueError:
-                return np.nan
-    try:
-        return float(rss_str)
-    except ValueError:
-        return np.nan
 
 merged_df['MaxRSS_Bytes'] = merged_df['MaxRSS'].apply(parse_maxrss)
 
