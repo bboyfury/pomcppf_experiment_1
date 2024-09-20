@@ -1,0 +1,1 @@
+y /lustre/work/soh/alirezas/run1/OASYS/scripts/wildfire/job_statistics_1_1_100_0.0_500_10_25_10.csv
