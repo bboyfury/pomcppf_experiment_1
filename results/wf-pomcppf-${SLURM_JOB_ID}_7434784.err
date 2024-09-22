@@ -1,1 +1,0 @@
-<frozen importlib._bootstrap>:228: UserWarning: enum class WildfireReasoningType not importable from oasys.domains.wildfire.wildfire_reasoning. You are probably using a cpdef enum declared in a .pxd file that does not have a .py  or .pyx file.

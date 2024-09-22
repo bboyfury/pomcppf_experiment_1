@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-import pandas as pd
+from helpers import bytes_to_human_readable, parse_maxrss
 
 
 
@@ -65,7 +65,7 @@ merged_df = pd.merge(job_info_df, sacct_df, on='MainJobID')
 
 
 # Convert necessary columns to numeric types
-numeric_columns = ['TRAJECTORIES', 'Horizon', 'PARTICLES', 'ElapsedRaw']
+numeric_columns = [ 'ElapsedRaw']
 for col in numeric_columns:
     merged_df[col] = pd.to_numeric(merged_df[col], errors='coerce')
 
@@ -76,7 +76,10 @@ merged_df['AverageReward'] = 0.0
 merged_df['AverageReward'] = merged_df['MainJobID'].apply(calculate_average_rewards)
 # Remove rows where 'MainJobID' does not contain 'batch'
 # Loop through each unique JobID
-merged_df = merged_df[merged_df['MaxRSS'].notna() & (merged_df['MaxRSS'] != '')]
+merged_df['MaxRSS_Bytes'] = merged_df['MaxRSS'].apply(parse_maxrss)
+
+merged_df = merged_df[merged_df['MaxRSS_Bytes'].notna() & (merged_df['MaxRSS'] != '')]
+
 # for i,result in merged_df.iterrows():
 #     merged_df.at[i,'AverageReward'] =calculate_average_rewards(result['MainJobID'])
 
