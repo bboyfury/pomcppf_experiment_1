@@ -1,0 +1,35 @@
+# Import necessary libraries
+import tensorflow as tf
+from tensorflow.keras.layers import Input, Embedding, LSTM, Dense
+from tensorflow.keras.models import Model
+
+# Define input
+input_seq = Input(shape=(sequence_length,), name='action_sequence')
+
+# Action embedding (if necessary)
+# embedded_seq = Embedding(input_dim=num_actions, output_dim=embedding_dim)(input_seq)
+
+# LSTM layers
+lstm_out = LSTM(units=128, return_sequences=False)(input_seq)
+
+# Goal prediction head
+goal_pred = Dense(units=num_goals, activation='softmax', name='goal_output')(lstm_out)
+
+# Agent type prediction head
+type_pred = Dense(units=num_types, activation='softmax', name='type_output')(lstm_out)
+
+# Define the model
+model = Model(inputs=input_seq, outputs=[goal_pred, type_pred])
+
+# Compile the model
+model.compile(optimizer='adam',
+              loss={'goal_output': 'categorical_crossentropy',
+                    'type_output': 'categorical_crossentropy'},
+              loss_weights={'goal_output': alpha, 'type_output': beta},
+              metrics=['accuracy'])
+
+# Train the model
+model.fit(x_train, [y_goal_train, y_type_train],
+          validation_data=(x_val, [y_goal_val, y_type_val]),
+          epochs=num_epochs,
+          batch_size=batch_size)
